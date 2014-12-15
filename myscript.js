@@ -76,8 +76,13 @@
 
 console.log('background running');
 
-
 var login = function(){
+	//example response
+	//{"msg": "success!",
+	//  "userid": 1,
+	//   "user": "ben", 
+	//   "goals": [{"name": "ads", "id": 1}]
+	// }
 	jQuery.ajax({
 	  type: "POST",
 	  url: "https://salty-inlet-9116.herokuapp.com/login_json/",
@@ -90,10 +95,36 @@ var login = function(){
 		console.log('error' + err);
 
 	})
-.success(function( data ) {
-		
-		console.log('success ! data: ' + data.user);
-		  });
+	.success(function( data ) {
+			
+			console.log('success ! data: ' + 'userid ' +  data.userid + 'data goal ' + data.goals[0].id);
+
+			if(data.userid && data.goals[0].id){
+				alert('storing data.userid! ' + data.userid + 'data goal ' + data.goals[0].id);
+				chrome.storage.sync.set({'userid': data.userid, 'goalid': data.goals[0].id}, function() {
+			          // Notify that we saved.
+			          console.log('storing userid and goal');
+			         
+			    });
+
+			}
+			else if (data.userid){
+				alert("no  goal!");
+				chrome.storage.sync.set({'userid': data.userid}, function() {
+			          // Notify that we saved.
+			          console.log('only able to store userid');
+			         
+			    });
+			}
+			else{
+				alert('no goal or uid found');
+				console.log('nothing saved');
+			}
+			
+
+
+
+	});
 };
 
 var select_goal = function(){
@@ -133,4 +164,23 @@ var main = function(){
 
 
 
-setInterval(main, 3000);
+
+
+$(document).ready(function(){
+	alert('running login')
+	login()
+	alert('login complete now getting from storage')
+
+
+
+	chrome.storage.sync.get(['userid','goalid'], function(result){
+		console.log('printing from retrieved_value');
+		console.log('user id :' + result.userid);
+		console.log('goalid :' + result.goalid);
+	})
+
+
+
+
+});
+
