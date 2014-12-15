@@ -1,0 +1,32 @@
+{
+  "manifest_version": 2,
+
+  "name": "Moocmate Extension",
+  "description": "This extension helps you finish moocs.",
+  "version": "1.0",
+
+  "permissions": [
+   "tabs", 
+  "https://*.coursera.org/*",
+   "webNavigation",
+   "storage"
+  ],
+
+
+   "background": {
+    "scripts": ["jquery-1.11.1.min.js", "background.js"]
+  },
+
+
+
+   "content_scripts": [
+   {
+    "matches": ["https://*.coursera.org/*"],
+    "js": ["jquery-1.11.1.min.js", "myscript.js"]
+  }
+  ]
+
+}
+
+
+
