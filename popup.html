@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Moocbuddy</title>
+    <style>
+      body {
+        min-width: 357px;
+        overflow-x: hidden;
+      }
+
+      img {
+        margin: 5px;
+        border: 2px solid black;
+        vertical-align: middle;
+        width: 75px;
+        height: 75px;
+      }
+    </style>
+
+    <!--
+      - JavaScript and HTML must be in separate files: see our Content Security
+      - Policy documentation[1] for details and explanation.
+      -
+      - [1]: http://developer.chrome.com/extensions/contentSecurityPolicy.html
+     -->
+    <script src="jquery-1.11.1.min.js"></script>
+    <script src="popup.js"></script>
+  </head>
+  <body>
+    <h1>HI from Moocbuddy extension!</h1>
+    <p>Empowering you to succeed in online coursework.</p>
+    <div class = "user_content">
+
+    </div>
+
+
+    <form class = 'login'>
+      Username: <input type="text" name="username"><br>
+      Password: <input type="text" name="password"><br>
+      <button id = 'login' > Log in </button>
+    </form>
+  </body>
+</html>
+

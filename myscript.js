@@ -168,7 +168,7 @@ var main = function(){
 
 $(document).ready(function(){
 	alert('running login')
-	login()
+	//login()
 	alert('login complete now getting from storage')
 
 
