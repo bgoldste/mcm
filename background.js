@@ -36,31 +36,43 @@ chrome.storage.sync.get(['state', 'data', 'startTime'], function(result){
 
 
 var logout = function(){
+	resetStartTime();
 	data = {};
 	state = 'not_logged_in';
-	chrome.storage.sync.set({'state': 'not_logged_in', 'data': {}})
+	chrome.storage.sync.set({'state': 'not_logged_in', 'data': {} },
+			refreshPopup()
+		);
+	
 };
+
+
+var resetStartTime = function(){
+	startTime = new Date();
+	data.startTime = startTime;
+	chrome.storage.sync.set({'startTime': data.startTime});
+
+}
+
 
 
 
 var startTimer = function  () {
+	console.log('running start');
 	if (data.startTime === undefined){
-		startTime = new Date();
-		data.startTime = startTime;
-		chrome.storage.sync.set({'startTime': data.startTime});
+		state = 'in_class';
+		resetStartTime();
 		refreshPopup();
+		goToClass();
 	}
 };
-
 
 
 var submitTime = function(elapsedTime){
 	state = 'submit_time';
 	data.elapsedTime = elapsedTime;
-	chrome.storage.sync.set({'elapsedTime': data.startTime, 'state': 'submit_time'});
-	refreshPopup();
-
-
+	chrome.storage.sync.set({'elapsedTime': data.startTime, 'state': 'submit_time'},
+		refreshPopup
+		);
 };
 
 
@@ -72,19 +84,81 @@ var refreshPopup = function() {
 	   		chrome.extension.getViews()[i].location.reload();
 		}
 	}
-
 }
+
+
+var goToClass = function(){
+	var createProperties = {'url': data.goal.url};
+	chrome.tabs.create(createProperties);
+
+};
+
+var updateTimeWorked = function(timeWorked){
+	data.goal.time_worked = timeWorked;
+}
+
+
+var addTime = function(){ 
+	//arbitrary time so that you don't add crazy amount of time (tho this would still be crazy)
+	if(data.userid && data.goal.id){
+		if(startTime.valueOf() > 1357002000){
+			console.log('time found, running add user')
+			var timeToAdd = new Date() - startTime;
+			var url = ("https://salty-inlet-9116.herokuapp.com/add/?user=" + data.userid + "&time=" + timeToAdd + '&goal=' + data.goal.id)
+			console.log(url);
+			jQuery.ajax({  type: "POST",
+				url: url,
+				data : {'asda': 'asdsad'},
+				dataType: 'json',
+			}) 
+			.error(function( data, err) {
+				console.log(data);
+				console.log(err);
+			})
+			.success(function( responseData ) {
+				console.log('succesfully posted to add printing respones below');
+				console.log(responseData);
+				resetStartTime();
+				updateTimeWorked(responseData.new_goal_time);
+				console.log('time worked updated to ' + responseData.new_goal_time);
+
+
+				
+			});
+
+		}
+		else{
+			resetStartTime();
+			addTime();
+			console.log('no start time found, resetting and addign!');
+		}
+
+		state = 'logged_in';
+		chrome.storage.sync.set({'state': 'logged_in'},
+			refreshPopup
+		);
+	}
+	else{
+		logout();
+	}
+};
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 var login = function(username, password){
-	//example response
-	//{"msg": "success!",
-	//  "userid": 1,
-	//   "user": "ben", 
-	//   "goals": [{"name": "ads", "id": 1}]
-	// }
+	logout();
+
 
 	jQuery.ajax({
 	  type: "POST",
@@ -100,30 +174,19 @@ var login = function(username, password){
 	})
 	.success(function( response ) {
 			
-			//console.log('success ! data: ' + 'userid ' +  response.userid + 'data goal ' + response.goals[0].id);
-			if(response.userid && response.goals[0].id){
-				console.log('storing data.userid! ' + response.userid + 'data goal ' + response.goals[0].id);
-				// chrome.storage.sync.set({'userid': response.userid, 'goalid': response.goals[0].id}, function() {
-			 //          // Notify that we saved.
-			 //          console.log('storing userid and goal');
-			 //    });
-			    data.userid = response.userid;
-			    data.goalid = response.goals[0].id;
+			if (response.status === 'success'){
 			    state = 'logged_in';
-			    chrome.storage.sync.set({'state': 'logged_in', 'data': {'userid': response.userid, 'goalid': response.goals[0].id}})
-			    refreshPopup();
-			}
-			else if (data.userid){
-				console.log("no  goal!");
-				
+			    data  = response;
+			    chrome.storage.sync.set( {'state': 'logged_in', 'data': response },  refreshPopup); 
+			    
+					
 			}
 			else{
 				console.log('no goal or uid found');
 				console.log('nothing saved');
 			}
-			
-
-
-
 	});
 };
+
+
+
