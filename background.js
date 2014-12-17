@@ -121,7 +121,7 @@ var addTime = function(){
 				resetStartTime();
 				updateTimeWorked(responseData.new_goal_time);
 				console.log('time worked updated to ' + responseData.new_goal_time);
-
+				refreshPopup();
 
 				
 			});
