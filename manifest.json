@@ -3,7 +3,7 @@
 
   "name": "Moocmate Extension",
   "description": "This extension helps you finish moocs.",
-  "version": "1.0",
+  "version": "0.1",
 
   "permissions": [
    "tabs", 

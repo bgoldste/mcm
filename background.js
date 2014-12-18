@@ -190,3 +190,57 @@ var login = function(username, password){
 
 
 
+
+
+var checkGoalIsActive = function () {
+	
+	if (data.goal.url){
+		chrome.tabs.query({active:true, highlighted:true, }, function(tabs){
+			var isActive = false;
+			console.log('printing tbs')
+			console.log(tabs);
+			for (var i = 0; i < tabs.length; i++){
+				if(data.goal.url === tabs[i].url){
+					console.log('tab is active');
+					isActive = true;
+					sendGoalState(isActive);
+					return;
+				}
+
+			}
+			sendGoalState(isActive);
+		});
+	}
+	else{
+		return;
+	}
+}
+
+var sendGoalState = function(goalState){
+	console.log('sendgoal state' + goalState);
+	console.log(goalState);
+	if(goalState === true){
+		state = 'in_class';
+		refreshPopup();
+	}
+	else{
+		state = 'logged_in';
+		refreshPopup();
+	}
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

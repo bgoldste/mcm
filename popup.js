@@ -38,8 +38,9 @@ document.addEventListener('DOMContentLoaded', function() {
 			$('.timer').append('<h3 id = "elapsed"> Elapsed Time: seconds </h3>');
 			setInterval(function(){ 
 				elapsedTime = (new Date() - data.startTime)/1000; 
-
+				chrome.extension.getBackgroundPage().checkGoalIsActive();
 				$('#elapsed').html('Elapsed Time: ' + elapsedTime + ' seconds');
+
 			}, 200);
 
 
