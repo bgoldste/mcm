@@ -5,9 +5,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	state = chrome.extension.getBackgroundPage().state;
 	data = chrome.extension.getBackgroundPage().data;
-	
+	totalTime =chrome.extension.getBackgroundPage().totalTime;
 	console.log(state);
 	console.log(data);
+
+
 	if(state === 'not_logged_in' || state === undefined){
 		$('h1').css("color", "green");
 		$(' button#login ').click( function(){
@@ -21,36 +23,32 @@ document.addEventListener('DOMContentLoaded', function() {
 	}
 
 
-	// if(state === 'submit_time'){
-	// 	$('form').hide();
-	// 	$('.user_content').append('<h1>Submit your time of : ' + data.elapsedTime + '!</h1>');
-	// 	$('.user_content').append('<a id= "logout" href = "">logout</a>');
-	// 	$('#logout').click(function(){
-	// 		chrome.extension.getBackgroundPage().logout();
-	// 	});
-	// }
+
 
 	else if(state === 'in_class'){
+		chrome.extension.getBackgroundPage().keepTotalTime();
 		$('form').hide();
-		if(data.startTime){
-			//now = new Date() 
-			$('p').text("You're in class now, get to work!");
-			$('.timer').append('<h3 id = "elapsed"> Elapsed Time: seconds </h3>');
-			setInterval(function(){ 
-				elapsedTime = (new Date() - data.startTime)/1000; 
-				chrome.extension.getBackgroundPage().checkGoalIsActive();
-				$('#elapsed').html('Elapsed Time: ' + elapsedTime + ' seconds');
+		
+		//now = new Date() 
+		$('p').text("You're in class now, get to work!");
+		$('.timer').append('<h3 id = "elapsed"> Elapsed Time: seconds </h3>');
+		setInterval(function(){ 
+			console.log('setint from in class popup')
+			elapsedTime = totalTime; 
+			chrome.extension.getBackgroundPage().checkGoalIsActive();
+			$('#elapsed').html('Elapsed Time: ' + elapsedTime + ' seconds');
 
-			}, 200);
+		}, 200);
 
 
 
-			$('.timer').append('<button id="submitTime">Submit your time</button>');
-			$('#submitTime').click(function(){
-				console.log('submitting time ' + elapsedTime);
-				chrome.extension.getBackgroundPage().addTime();
-			});
-		}
+		$('.timer').append('<button id="submitTime">Submit your time</button>');
+		$('#submitTime').click(function(){
+			console.log('submitting time ' + elapsedTime);
+			alert('running addtime line 46');
+			chrome.extension.getBackgroundPage().addTime();
+		});
+	
 	}
 
 
@@ -60,6 +58,11 @@ document.addEventListener('DOMContentLoaded', function() {
 	else if(state === 'logged_in'){
 		$('h1').css("color", "blue");
 		$('form').hide();
+		// setInterval(function(){ 
+				
+		// 		chrome.extension.getBackgroundPage().checkGoalIsActive();
+				
+		// 	}, 500);
 
 		$('.user_content').append('<h1>You are logged in </h1>');
 		$('.user_content').append('<ul class = "userinfo"></ul>');
@@ -72,11 +75,13 @@ document.addEventListener('DOMContentLoaded', function() {
 			$('.userinfo').append('<li> url: ' +  data.goal.url       + '</li>');
 
 
-		if(data.startTime){
+
+
+		if(totalTime > 0 ){
 			//now = new Date() 
 			$('.timer').append('<h3 id = "elapsed"> Elapsed Time: seconds </h3>');
 			setInterval(function(){ 
-				elapsedTime = (new Date() - data.startTime)/1000; 
+				elapsedTime = totalTime; 
 
 				$('#elapsed').html('Elapsed Time: ' + elapsedTime + ' seconds');
 			}, 200);
@@ -86,6 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			$('.timer').append('<button id="submitTime">Submit your time</button>');
 			$('#submitTime').click(function(){
 				console.log('submitting time ' + elapsedTime);
+				alert('running addtime line 46');
 				chrome.extension.getBackgroundPage().addTime();
 			})
 
@@ -93,7 +99,8 @@ document.addEventListener('DOMContentLoaded', function() {
 		else{
 			$('.timer').append('<button id = "timer">Start Time</button');
 			$('#timer').click(function(){
-				chrome.extension.getBackgroundPage().startTimer();
+				chrome.extension.getBackgroundPage().keepTotalTime();
+				chrome.extension.getBackgroundPage().goToClass();
 			});
 		}
 
@@ -101,6 +108,8 @@ document.addEventListener('DOMContentLoaded', function() {
 		$('#logout').click(function(){
 			chrome.extension.getBackgroundPage().logout();
 		});
+
+
 	}
 });
 

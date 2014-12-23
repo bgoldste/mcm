@@ -6,9 +6,16 @@ var data;
 
 var state;
 
-var startTime;
+// var startTime;
 
-chrome.storage.sync.get(['state', 'data', 'startTime'], function(result){
+var timer;
+
+var totalTime;
+
+var isActive;
+
+//initialize variables based on call to storage
+chrome.storage.sync.get(['state', 'data', 'totalTime'], function(result){
 	if(result.state){
 		state = result.state;
 	}
@@ -23,58 +30,64 @@ chrome.storage.sync.get(['state', 'data', 'startTime'], function(result){
 		data = {}
 	}
 
-	if(result.startTime){
-		startTime = result.startTime;
+	// if(result.startTime){
+	// 	startTime = result.startTime;
+	// }
+	// else{
+	// 	startTime = new Date();
+	// }
+
+	if(result.totalTime){
+		totalTime = result.totalTime;
 	}
 	else{
-		startTime = new Date();
+		totalTime = 0;
 	}
-
-
 });
 
 
-
 var logout = function(){
-	resetStartTime();
+	//resetStartTime();
+	resetTotalTime();
 	data = {};
 	state = 'not_logged_in';
 	chrome.storage.sync.set({'state': 'not_logged_in', 'data': {} },
 			refreshPopup()
 		);
-	
 };
 
 
-var resetStartTime = function(){
-	startTime = new Date();
-	data.startTime = startTime;
-	chrome.storage.sync.set({'startTime': data.startTime});
+// var resetStartTime = function(){
+// 	startTime = new Date();
+// 	data.totalTime = startTime;
+// 	chrome.storage.sync.set({'startTime': data.startTime});
 
+// }
+
+var resetTotalTime = function(){
+	totalTime = 0;
+	chrome.storage.sync.set({'totalTime': totalTime});
 }
 
 
+// var startTimer = function  () {
+// 	console.log('running start');
+// 	if (data.startTime === undefined){
+// 		state = 'in_class';
+// 		resetStartTime();
+// 		//refreshPopup();
+// 		goToClass();
+// 	}
+// };
 
 
-var startTimer = function  () {
-	console.log('running start');
-	if (data.startTime === undefined){
-		state = 'in_class';
-		resetStartTime();
-		refreshPopup();
-		goToClass();
-	}
-};
-
-
-var submitTime = function(elapsedTime){
-	state = 'submit_time';
-	data.elapsedTime = elapsedTime;
-	chrome.storage.sync.set({'elapsedTime': data.startTime, 'state': 'submit_time'},
-		refreshPopup
-		);
-};
-
+// var submitTime = function(elapsedTime){
+// 	state = 'submit_time';
+// 	data.elapsedTime = elapsedTime;
+// 	chrome.storage.sync.set({'elapsedTime': data.startTime, 'state': 'submit_time'},
+// 		refreshPopup
+// 		);
+// };
 
 
 
@@ -86,12 +99,12 @@ var refreshPopup = function() {
 	}
 }
 
-
+//opens url in new tab
 var goToClass = function(){
 	var createProperties = {'url': data.goal.url};
 	chrome.tabs.create(createProperties);
-
 };
+
 
 var updateTimeWorked = function(timeWorked){
 	data.goal.time_worked = timeWorked;
@@ -101,36 +114,37 @@ var updateTimeWorked = function(timeWorked){
 var addTime = function(){ 
 	//arbitrary time so that you don't add crazy amount of time (tho this would still be crazy)
 	if(data.userid && data.goal.id){
-		if(startTime.valueOf() > 1357002000){
-			console.log('time found, running add user')
-			var timeToAdd = new Date() - startTime;
+		if(totalTime >= 0 ){
+			console.log('time greater than a minute found, running add time')
+			var timeToAdd = totalTime;
 			var url = ("https://salty-inlet-9116.herokuapp.com/add/?user=" + data.userid + "&time=" + timeToAdd + '&goal=' + data.goal.id)
 			console.log(url);
-			jQuery.ajax({  type: "POST",
-				url: url,
-				data : {'asda': 'asdsad'},
-				dataType: 'json',
-			}) 
-			.error(function( data, err) {
-				console.log(data);
-				console.log(err);
-			})
-			.success(function( responseData ) {
-				console.log('succesfully posted to add printing respones below');
-				console.log(responseData);
-				resetStartTime();
-				updateTimeWorked(responseData.new_goal_time);
-				console.log('time worked updated to ' + responseData.new_goal_time);
-				refreshPopup();
+			// jQuery.ajax({  type: "POST",
+			// 	url: url,
+			// 	data : {'asda': 'asdsad'},
+			// 	dataType: 'json',
+			// }) 
+			// .error(function( data, err) {
+			// 	console.log(data);
+			// 	console.log(err);
+			// })
+			// .success(function( responseData ) {
+			// 	console.log('succesfully posted to add printing respones below');
+			// 	console.log(responseData);
+			// 	resetTotalTime;
+			// 	updateTimeWorked(responseData.new_goal_time);
+			// 	console.log('time worked updated to ' + responseData.new_goal_time);
+			// 	refreshPopup();
 
 				
-			});
+			// });
 
 		}
+		//total time is less than 60
 		else{
-			resetStartTime();
-			addTime();
-			console.log('no start time found, resetting and addign!');
+			
+			//addTime();
+			console.log('no start time found, resetting and addign! THIS SHOULD BE CHANGED');
 		}
 
 		state = 'logged_in';
@@ -144,26 +158,12 @@ var addTime = function(){
 };
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 var login = function(username, password){
 	logout();
-
 
 	jQuery.ajax({
 	  type: "POST",
 	  url: "https://salty-inlet-9116.herokuapp.com/login_json/",
-
 	  data : {'username': username, 'password': password},
 	  dataType: 'json',
 	}) 
@@ -178,8 +178,7 @@ var login = function(username, password){
 			    state = 'logged_in';
 			    data  = response;
 			    chrome.storage.sync.set( {'state': 'logged_in', 'data': response },  refreshPopup); 
-			    
-					
+			    	
 			}
 			else{
 				console.log('no goal or uid found');
@@ -193,41 +192,71 @@ var login = function(username, password){
 
 
 var checkGoalIsActive = function () {
-	
+	console.log('checking if goal url is active');
 	if (data.goal.url){
+		
 		chrome.tabs.query({active:true, highlighted:true, }, function(tabs){
-			var isActive = false;
-			console.log('printing tbs')
-			console.log(tabs);
+			
 			for (var i = 0; i < tabs.length; i++){
 				if(data.goal.url === tabs[i].url){
-					console.log('tab is active');
+					console.log('goal url tab is active');
 					isActive = true;
 					sendGoalState(isActive);
-					return;
+					return true;
 				}
-
+				console.log('tab is not active');
+				isActive = false;
 			}
 			sendGoalState(isActive);
+			return false;
 		});
+
 	}
 	else{
-		return;
+		return false;
 	}
-}
+};
 
 var sendGoalState = function(goalState){
 	console.log('sendgoal state' + goalState);
 	console.log(goalState);
 	if(goalState === true){
-		state = 'in_class';
-		refreshPopup();
+		//if not currently in class, set to in class and refresh
+		keepTotalTime()
+		if(state !== 'in_class'){
+			state = 'in_class';
+			refreshPopup();
+		}	
+	
 	}
 	else{
-		state = 'logged_in';
-		refreshPopup();
+		// clearInterval(timer);
+		// addTime();
+		if (state !== 'logged_in'){
+			state = 'logged_in';
+			//refreshPopup();
+		}
 	}
 
+};
+
+var keepTotalTime = function(){
+	//if timer is not started, start it
+	if(timer === undefined){
+		console.log('no timer found, starting time');
+		timer = setInterval(function(){
+			checkGoalIsActive()
+			if (isActive === true ){
+				console.log('active, incrementing');
+				totalTime += 1;
+			}
+		}, 1000);
+	}
+	//if timer exists, check if active still
+	else{
+		console.log('timer found');
+
+	}
 };
 
 
