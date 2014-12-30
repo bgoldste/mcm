@@ -106,38 +106,38 @@ var goToClass = function(){
 };
 
 
-var updateTimeWorked = function(timeWorked){
-	data.goal.time_worked = timeWorked;
-}
+// var updateTimeWorked = function(timeWorked){
+// 	data.goal.time_worked = timeWorked;
+// }
 
 
 var addTime = function(){ 
 	//arbitrary time so that you don't add crazy amount of time (tho this would still be crazy)
 	if(data.userid && data.goal.id){
-		if(totalTime >= 0 ){
-			console.log('time greater than a minute found, running add time')
+		if(totalTime >= 1 ){
+			console.log('adding time:', totalTime);
 			var timeToAdd = totalTime;
 			var url = ("https://salty-inlet-9116.herokuapp.com/add/?user=" + data.userid + "&time=" + timeToAdd + '&goal=' + data.goal.id)
-			console.log(url);
-			// jQuery.ajax({  type: "POST",
-			// 	url: url,
-			// 	data : {'asda': 'asdsad'},
-			// 	dataType: 'json',
-			// }) 
-			// .error(function( data, err) {
-			// 	console.log(data);
-			// 	console.log(err);
-			// })
-			// .success(function( responseData ) {
-			// 	console.log('succesfully posted to add printing respones below');
-			// 	console.log(responseData);
-			// 	resetTotalTime;
-			// 	updateTimeWorked(responseData.new_goal_time);
-			// 	console.log('time worked updated to ' + responseData.new_goal_time);
-			// 	refreshPopup();
+			
+			jQuery.ajax({  type: "POST",
+				url: url,
+				data : {'asda': 'asdsad'},
+				dataType: 'json',
+			}) 
+			.error(function( data, err) {
+				console.log(data);
+				console.log(err);
+			})
+			.success(function( responseData ) {
+				console.log('succesfully posted to add printing respones below');
+				console.log(responseData);
+				resetTotalTime();
+				// updateTimeWorked(responseData.new_goal_time);
+				// console.log('time worked updated to ' + responseData.new_goal_time);
+				refreshPopup();
 
 				
-			// });
+			});
 
 		}
 		//total time is less than 60
@@ -172,6 +172,7 @@ var login = function(username, password){
 		console.log('error' + err);
 
 	})
+	//todo - change response to throw an error if it doesn't work (instead of in status)
 	.success(function( response ) {
 			
 			if (response.status === 'success'){
